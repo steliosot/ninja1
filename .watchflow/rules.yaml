@@ -18,3 +18,14 @@ rules:
     parameters:
       restricted_days: [Saturday, Sunday]
       message: "Deployments are not allowed on weekends"
+
+  - id: pr-label-weekends
+    name: PR Must Have Label
+    description: All pull requests must have at least 1 label
+    enabled: true
+    severity: low
+    event_types: [pull_request]
+    parameters:
+      min_labels: 1
+      message: "Pull requests require at least 1 label"
+
