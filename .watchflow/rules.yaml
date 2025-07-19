@@ -1,0 +1,20 @@
+rules:
+  - id: pr-approval-required
+    name: PR Approval Required
+    description: All pull requests must have at least 2 approvals
+    enabled: true
+    severity: high
+    event_types: [pull_request]
+    parameters:
+      min_approvals: 2
+      message: "Pull requests require at least 2 approvals"
+
+  - id: no-deploy-weekends
+    name: No Weekend Deployments
+    description: Prevent deployments on weekends
+    enabled: true
+    severity: medium
+    event_types: [deployment]
+    parameters:
+      restricted_days: [Saturday, Sunday]
+      message: "Deployments are not allowed on weekends"
