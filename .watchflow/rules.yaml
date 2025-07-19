@@ -1,31 +1,127 @@
+# Watchflow Rules Configuration
+# Place this file in your repository at .github/rules.yaml
+
 rules:
-  - id: pr-approval-required
-    name: PR Approval Required
-    description: All pull requests must have at least 2 approvals
+  # Pull Request Rules
+  - id: "no-weekend-merges"
+    name: "No PR merges on weekends"
+    description: "Prevents pull request merges on Saturday and Sunday to maintain code quality and review processes"
     enabled: true
-    severity: high
-    event_types: [pull_request]
+    severity: "high"
+    event_types: ["pull_request"]
+    parameters:
+      days: ["Saturday", "Sunday"]
+
+  - id: "min-pr-approvals"
+    name: "Minimum PR Approvals Required"
+    description: "Requires at least 2 approvals before merging a pull request"
+    enabled: true
+    severity: "medium"
+    event_types: ["pull_request"]
     parameters:
       min_approvals: 2
-      message: "Pull requests require at least 2 approvals"
 
-  - id: no-deploy-weekends
-    name: No Weekend Deployments
-    description: Prevent deployments on weekends
+  - id: "pr-title-pattern"
+    name: "PR Title Pattern"
+    description: "PR titles must follow the pattern PROJ-123: Description"
     enabled: true
-    severity: medium
-    event_types: [deployment]
+    severity: "medium"
+    event_types: ["pull_request"]
     parameters:
-      restricted_days: [Saturday, Sunday]
-      message: "Deployments are not allowed on weekends"
+      title_pattern: "^[A-Z]+-[0-9]+: .+"
 
-  - id: pr-label-weekends
-    name: PR Must Have Label
-    description: All pull requests must have at least 1 label
+  - id: "pr-description-required"
+    name: "PR Description Required"
+    description: "Pull requests must have a meaningful description"
     enabled: true
-    severity: low
-    event_types: [pull_request]
+    severity: "medium"
+    event_types: ["pull_request"]
     parameters:
-      min_labels: 1
-      message: "Pull requests require at least 1 label"
+      min_description_length: 10
 
+  - id: "required-labels"
+    name: "Required Labels"
+    description: "PRs must have specific labels before merging"
+    enabled: true
+    severity: "low"
+    event_types: ["pull_request"]
+    parameters:
+      required_labels: ["ready-for-review"]
+
+  - id: "file-size-limit"
+    name: "File Size Limit"
+    description: "Individual files cannot exceed 10MB"
+    enabled: true
+    severity: "high"
+    event_types: ["pull_request"]
+    parameters:
+      max_file_size_mb: 10
+
+  # Push Rules
+  - id: "commit-message-pattern"
+    name: "Commit Message Pattern"
+    description: "Commit messages must follow conventional commit format"
+    enabled: true
+    severity: "medium"
+    event_types: ["push"]
+    parameters:
+      pattern: "^(feat|fix|docs|style|refactor|test|chore)(\\(.+\\))?: .{1,50}"
+
+  - id: "no-force-push"
+    name: "No Force Push"
+    description: "Force pushes are not allowed"
+    enabled: true
+    severity: "critical"
+    event_types: ["push"]
+    parameters:
+      allow_force_push: false
+
+  - id: "protected-branch-push"
+    name: "Protected Branch Push"
+    description: "Direct pushes to main/master branches are not allowed"
+    enabled: true
+    severity: "high"
+    event_types: ["push"]
+    parameters:
+      protected_branches: ["main", "master"]
+
+  # Deployment Rules  
+  - id: "require-approval-prod"
+    name: "Production Deployment Approval"
+    description: "Production deployments require team lead approval"
+    enabled: true
+    severity: "critical"
+    event_types: ["deployment_review"]
+    parameters:
+      environments: ["production", "prod"]
+      required_teams: ["team-leads", "devops"]
+
+  - id: "restrict-prod-hours"
+    name: "Production Deployment Hours"
+    description: "Production deployments only allowed during business hours"
+    enabled: true
+    severity: "high"
+    event_types: ["deployment"]
+    parameters:
+      environments: ["production", "prod"]
+      allowed_hours: [9, 10, 11, 12, 13, 14, 15, 16, 17]
+
+  - id: "restrict-prod-branches"
+    name: "Production Branch Restriction"
+    description: "Production deployments only from main branch"
+    enabled: true
+    severity: "critical"
+    event_types: ["deployment_review"]
+    parameters:
+      environments: ["production", "prod"]
+      branches: ["main", "master"]
+
+  # Check Run Rules
+  - id: "required-checks"
+    name: "Required Checks Must Pass"
+    description: "Specific checks must pass before proceeding"
+    enabled: true
+    severity: "high"
+    event_types: ["check_run"]
+    parameters:
+      required_checks: ["tests", "lint", "security-scan"]
